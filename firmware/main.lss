@@ -1,0 +1,239 @@
+
+main.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         000000c6  00000000  00000000  00000074  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000000  00800060  000000c6  0000013a  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .comment      00000011  00000000  00000000  0000013a  2**0
+                  CONTENTS, READONLY
+  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  0000014c  2**2
+                  CONTENTS, READONLY
+  4 .debug_aranges 00000020  00000000  00000000  00000188  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  5 .debug_info   0000063c  00000000  00000000  000001a8  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_abbrev 00000523  00000000  00000000  000007e4  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_line   0000016a  00000000  00000000  00000d07  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_frame  00000024  00000000  00000000  00000e74  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_str    00000332  00000000  00000000  00000e98  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_loc    000000f8  00000000  00000000  000011ca  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_ranges 00000010  00000000  00000000  000012c2  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	0e c0       	rjmp	.+28     	; 0x1e <__ctors_end>
+   2:	15 c0       	rjmp	.+42     	; 0x2e <__bad_interrupt>
+   4:	14 c0       	rjmp	.+40     	; 0x2e <__bad_interrupt>
+   6:	13 c0       	rjmp	.+38     	; 0x2e <__bad_interrupt>
+   8:	12 c0       	rjmp	.+36     	; 0x2e <__bad_interrupt>
+   a:	11 c0       	rjmp	.+34     	; 0x2e <__bad_interrupt>
+   c:	10 c0       	rjmp	.+32     	; 0x2e <__bad_interrupt>
+   e:	0f c0       	rjmp	.+30     	; 0x2e <__bad_interrupt>
+  10:	0e c0       	rjmp	.+28     	; 0x2e <__bad_interrupt>
+  12:	0d c0       	rjmp	.+26     	; 0x2e <__bad_interrupt>
+  14:	0c c0       	rjmp	.+24     	; 0x2e <__bad_interrupt>
+  16:	0b c0       	rjmp	.+22     	; 0x2e <__bad_interrupt>
+  18:	0a c0       	rjmp	.+20     	; 0x2e <__bad_interrupt>
+  1a:	09 c0       	rjmp	.+18     	; 0x2e <__bad_interrupt>
+  1c:	08 c0       	rjmp	.+16     	; 0x2e <__bad_interrupt>
+
+0000001e <__ctors_end>:
+  1e:	11 24       	eor	r1, r1
+  20:	1f be       	out	0x3f, r1	; 63
+  22:	cf e5       	ldi	r28, 0x5F	; 95
+  24:	d2 e0       	ldi	r29, 0x02	; 2
+  26:	de bf       	out	0x3e, r29	; 62
+  28:	cd bf       	out	0x3d, r28	; 61
+  2a:	02 d0       	rcall	.+4      	; 0x30 <main>
+  2c:	4a c0       	rjmp	.+148    	; 0xc2 <_exit>
+
+0000002e <__bad_interrupt>:
+  2e:	e8 cf       	rjmp	.-48     	; 0x0 <__vectors>
+
+00000030 <main>:
+}
+
+
+int main(void)
+{
+    SWITCH_INIT();
+  30:	b9 98       	cbi	0x17, 1	; 23
+  32:	c1 9a       	sbi	0x18, 1	; 24
+    _delay_ms(400);
+    RELAY_COIL2_OFF();
+}
+
+static void relay_init() {
+    RELAY_COIL1_INIT();
+  34:	bc 9a       	sbi	0x17, 4	; 23
+  36:	c4 98       	cbi	0x18, 4	; 24
+    RELAY_COIL2_INIT();
+  38:	bb 9a       	sbi	0x17, 3	; 23
+  3a:	c3 98       	cbi	0x18, 3	; 24
+__attribute__ ((__always_inline__))
+void wdt_enable (const uint8_t value)
+{
+	if (_SFR_IO_REG_P (_WD_CONTROL_REG))
+	{
+		__asm__ __volatile__ (
+  3c:	9f e0       	ldi	r25, 0x0F	; 15
+  3e:	88 e1       	ldi	r24, 0x18	; 24
+  40:	0f b6       	in	r0, 0x3f	; 63
+  42:	f8 94       	cli
+  44:	a8 95       	wdr
+  46:	81 bd       	out	0x21, r24	; 33
+  48:	0f be       	out	0x3f, r0	; 63
+  4a:	91 bd       	out	0x21, r25	; 33
+    wdt_enable(WDTO_2S);
+
+    uint8_t led_on = 1;
+    uint8_t led_on_prev = 1;
+    uint8_t pressed_prev = 1;
+    TCNT0 = 0;
+  4c:	12 be       	out	0x32, r1	; 50
+
+    TCCR0B = _BV(CS00);// | _BV(CS02);
+  4e:	81 e0       	ldi	r24, 0x01	; 1
+  50:	83 bf       	out	0x33, r24	; 51
+    TIMSK |= _BV(TOIE0);
+  52:	89 b7       	in	r24, 0x39	; 57
+  54:	82 60       	ori	r24, 0x02	; 2
+  56:	89 bf       	out	0x39, r24	; 57
+
+#define SWITCH_IS_PRESSED() bit_is_clear(PINB,1)
+#define SWITCH_INIT() DDRB &=~_BV(PB1);PORTB|=_BV(PB1)
+
+static void relay_on() {
+    RELAY_COIL2_OFF();
+  58:	c3 98       	cbi	0x18, 3	; 24
+    RELAY_COIL1_ON();
+  5a:	c4 9a       	sbi	0x18, 4	; 24
+	#else
+		//round up by default
+		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+	#endif
+
+	__builtin_avr_delay_cycles(__ticks_dc);
+  5c:	2f e7       	ldi	r18, 0x7F	; 127
+  5e:	88 e3       	ldi	r24, 0x38	; 56
+  60:	91 e0       	ldi	r25, 0x01	; 1
+  62:	21 50       	subi	r18, 0x01	; 1
+  64:	80 40       	sbci	r24, 0x00	; 0
+  66:	90 40       	sbci	r25, 0x00	; 0
+  68:	e1 f7       	brne	.-8      	; 0x62 <__SREG__+0x23>
+  6a:	00 c0       	rjmp	.+0      	; 0x6c <__SREG__+0x2d>
+  6c:	00 00       	nop
+    _delay_ms(400);
+    RELAY_COIL1_OFF();
+  6e:	c4 98       	cbi	0x18, 4	; 24
+
+    int cnt = 0;
+
+    relay_on();
+
+    set_sleep_mode(SLEEP_MODE_IDLE);
+  70:	85 b7       	in	r24, 0x35	; 53
+  72:	87 7e       	andi	r24, 0xE7	; 231
+  74:	85 bf       	out	0x35, r24	; 53
+    
+    sei();
+  76:	78 94       	sei
+    TCNT0 = 0;
+
+    TCCR0B = _BV(CS00);// | _BV(CS02);
+    TIMSK |= _BV(TOIE0);
+
+    int cnt = 0;
+  78:	80 e0       	ldi	r24, 0x00	; 0
+  7a:	90 e0       	ldi	r25, 0x00	; 0
+    set_sleep_mode(SLEEP_MODE_IDLE);
+    
+    sei();
+
+    for (;;) {
+        wdt_reset();
+  7c:	a8 95       	wdr
+        sleep_mode();
+  7e:	25 b7       	in	r18, 0x35	; 53
+  80:	20 62       	ori	r18, 0x20	; 32
+  82:	25 bf       	out	0x35, r18	; 53
+  84:	88 95       	sleep
+  86:	25 b7       	in	r18, 0x35	; 53
+  88:	2f 7d       	andi	r18, 0xDF	; 223
+  8a:	25 bf       	out	0x35, r18	; 53
+        
+        if ((TIFR & _BV(TOV0))) {
+  8c:	08 b6       	in	r0, 0x38	; 56
+  8e:	01 fe       	sbrs	r0, 1
+  90:	14 c0       	rjmp	.+40     	; 0xba <__SREG__+0x7b>
+            cnt++;
+  92:	01 96       	adiw	r24, 0x01	; 1
+            uint8_t pressed = SWITCH_IS_PRESSED();
+  94:	26 b3       	in	r18, 0x16	; 22
+                }
+            }
+
+
+
+            if (cnt > 10000) {
+  96:	81 31       	cpi	r24, 0x11	; 17
+  98:	27 e2       	ldi	r18, 0x27	; 39
+  9a:	92 07       	cpc	r25, r18
+  9c:	74 f0       	brlt	.+28     	; 0xba <__SREG__+0x7b>
+    RELAY_COIL1_OFF();
+}
+
+
+static void relay_off() {
+    RELAY_COIL1_OFF();
+  9e:	c4 98       	cbi	0x18, 4	; 24
+    RELAY_COIL2_ON();
+  a0:	c3 9a       	sbi	0x18, 3	; 24
+  a2:	8f e7       	ldi	r24, 0x7F	; 127
+  a4:	98 e3       	ldi	r25, 0x38	; 56
+  a6:	21 e0       	ldi	r18, 0x01	; 1
+  a8:	81 50       	subi	r24, 0x01	; 1
+  aa:	90 40       	sbci	r25, 0x00	; 0
+  ac:	20 40       	sbci	r18, 0x00	; 0
+  ae:	e1 f7       	brne	.-8      	; 0xa8 <__SREG__+0x69>
+  b0:	00 c0       	rjmp	.+0      	; 0xb2 <__SREG__+0x73>
+  b2:	00 00       	nop
+    _delay_ms(400);
+    RELAY_COIL2_OFF();
+  b4:	c3 98       	cbi	0x18, 3	; 24
+            }
+
+
+
+            if (cnt > 10000) {
+                cnt = 0;
+  b6:	80 e0       	ldi	r24, 0x00	; 0
+  b8:	90 e0       	ldi	r25, 0x00	; 0
+                } else {
+                    relay_off();
+                }
+            }
+        }
+        TIFR |= TOV0;
+  ba:	28 b7       	in	r18, 0x38	; 56
+  bc:	21 60       	ori	r18, 0x01	; 1
+  be:	28 bf       	out	0x38, r18	; 56
+
+    }
+  c0:	dd cf       	rjmp	.-70     	; 0x7c <__SREG__+0x3d>
+
+000000c2 <_exit>:
+  c2:	f8 94       	cli
+
+000000c4 <__stop_program>:
+  c4:	ff cf       	rjmp	.-2      	; 0xc4 <__stop_program>
